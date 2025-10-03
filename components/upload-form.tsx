@@ -19,6 +19,20 @@ export function UploadForm() {
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Helper untuk convert file ke Base64
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        // hasilnya: "data:application/pdf;base64,xxxxxx"
+        const base64 = (reader.result as string).split(",")[1] // ambil bagian setelah koma
+        resolve(base64)
+      }
+      reader.onerror = (err) => reject(err)
+    })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -31,13 +45,18 @@ export function UploadForm() {
     setIsUploading(true)
 
     try {
-      const uploadFormData = new FormData()
-      uploadFormData.append("cv", cvFile)
-      uploadFormData.append("project_report", projectFile)
+      // Convert file ke base64
+      const cvBase64 = await fileToBase64(cvFile)
+      const projectBase64 = await fileToBase64(projectFile)
 
+      // Kirim ke backend
       const uploadResponse = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
-        body: uploadFormData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cv_base64: cvBase64,
+          project_base64: projectBase64,
+        }),
       })
 
       if (!uploadResponse.ok) {
@@ -48,11 +67,10 @@ export function UploadForm() {
       const cvDocumentId = uploadData.cv_document.id
       const projectDocumentId = uploadData.project_document.id
 
+      // Trigger evaluation
       const evaluateResponse = await fetch(`${API_BASE_URL}/evaluate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           job_title: jobTitle,
           cv_document_id: cvDocumentId,
@@ -87,10 +105,9 @@ export function UploadForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Job Title */}
           <div className="space-y-3">
-            <Label htmlFor="jobTitle" className="text-sm font-medium">
-              Job Title
-            </Label>
+            <Label htmlFor="jobTitle" className="text-sm font-medium">Job Title</Label>
             <Input
               id="jobTitle"
               placeholder="e.g., Product Engineer (Backend)"
@@ -101,10 +118,9 @@ export function UploadForm() {
             />
           </div>
 
+          {/* CV */}
           <div className="space-y-3">
-            <Label htmlFor="cv" className="text-sm font-medium">
-              Candidate CV (PDF)
-            </Label>
+            <Label htmlFor="cv" className="text-sm font-medium">Candidate CV (PDF)</Label>
             <div className="relative group">
               <Input
                 id="cv"
@@ -123,10 +139,9 @@ export function UploadForm() {
             </div>
           </div>
 
+          {/* Project Report */}
           <div className="space-y-3">
-            <Label htmlFor="project" className="text-sm font-medium">
-              Project Report (PDF)
-            </Label>
+            <Label htmlFor="project" className="text-sm font-medium">Project Report (PDF)</Label>
             <div className="relative group">
               <Input
                 id="project"
