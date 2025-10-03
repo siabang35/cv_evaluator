@@ -41,4 +41,4 @@ flake8==7.0.0
 sentence-transformers==2.2.2
 langchain-community==0.0.1
 chromadb==0.4.22
-groq==0.7.2
+groq==0.32.0
