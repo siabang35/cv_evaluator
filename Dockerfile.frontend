@@ -1,0 +1,35 @@
+# Gunakan Node.js versi LTS terbaru
+FROM node:20-alpine AS base
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy semua source code frontend
+COPY . .
+
+# ---------------------------
+# Development mode
+# ---------------------------
+FROM base AS dev
+CMD ["npm", "run", "dev"]
+
+# ---------------------------
+# Production build
+# ---------------------------
+FROM base AS builder
+RUN npm run build
+
+FROM node:20-alpine AS prod
+WORKDIR /app
+
+# Copy hanya file build dari stage builder
+COPY --from=builder /app ./
+
+# Expose port Next.js
+EXPOSE 3000
+
+# Jalankan Next.js production server
+CMD ["npm", "run", "start"]

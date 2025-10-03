@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: cv-backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+    command: gunicorn -k uvicorn.workers.UvicornWorker app.main:app -b 0.0.0.0:8000 --workers 4
+    restart: always
+
+  worker:
+    build: .
+    container_name: cv-worker
+    env_file:
+      - .env
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+    command: celery -A app.tasks.celery_config.celery_app worker --loglevel=info
+    restart: always
+
+  beat:
+    build: .
+    container_name: cv-beat
+    env_file:
+      - .env
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+      - ./chroma_db:/app/chroma_db
+    command: celery -A app.tasks.celery_config.celery_app beat --loglevel=info
+    restart: always
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: Dockerfile.frontend
+      target: prod
+    container_name: cv-frontend
+    env_file:
+      - ../.env.local
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: always
+
+  redis:
+    image: redis:6-alpine
+    container_name: cv-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+volumes:
+  uploads:
+  chroma_db:
