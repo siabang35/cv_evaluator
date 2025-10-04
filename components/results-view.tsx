@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+  process.env.NEXT_PUBLIC_API_URL || "https://watches-executed-mostly-atom.trycloudflare.com/api"
 
 interface EvaluationResult {
   cv_match_rate: number
