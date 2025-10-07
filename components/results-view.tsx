@@ -24,7 +24,7 @@ import {
 } from "lucide-react"
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "ttps://legacy-journal-neon-membership.trycloudflare.com/api"
+  process.env.NEXT_PUBLIC_API_URL || "https://legacy-journal-neon-membership.trycloudflare.com/api"
 
 interface EvaluationResult {
   cv_match_rate: number

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 const BACKEND_EVALUATE_URL =
   process.env.NEXT_PUBLIC_API_URL + "/evaluate" ||
-  "https://nine-pad-jumping-over.trycloudflare.com/api/evaluate"
+  "https://legacy-journal-neon-membership.trycloudflare.com/api/evaluate"
 
 export async function POST(req: Request) {
   try {

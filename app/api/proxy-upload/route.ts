@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const res = await fetch(
-      "https://nine-pad-jumping-over.trycloudflare.com/api/upload",
+      "https://legacy-journal-neon-membership.trycloudflare.com/api/upload",
       {
         method: "POST",
         headers: {
